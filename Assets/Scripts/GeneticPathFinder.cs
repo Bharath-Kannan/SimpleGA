@@ -1,27 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class GeneticPathFinder : MonoBehaviour
+public class GeneticPathfinder : MonoBehaviour
 {
-    #region public_variables
-    public float creatureSpeed;
-    public float pathMulitplier;
-    #endregion
+    public float beesSpeed;
+    public float pathMultiplier;
+    public DNA dna;
+    public bool hasFinished = false;
 
-    #region private_variables
-    private DNA dna;
-    private bool hasFinished = false;
+    private int pathIndex = 0;
     private bool hasBeenInitialized = false;
     private Vector2 target;
     private Vector2 nextPoint;
-    private int pathIndex = 0;
-    #endregion
 
-    private void Start()
-    {
-        InitCreature(new DNA(), Vector2.zero);
-    }
     public void InitCreature(DNA newDna, Vector2 _target)
     {
         dna = newDna;
@@ -30,13 +20,26 @@ public class GeneticPathFinder : MonoBehaviour
         hasBeenInitialized = true;
     }
 
+    public float GetFitness
+    {
+        get
+        {
+            float dist = Vector2.Distance(transform.position, target);
+            if (dist == 0)
+            {
+                dist = 0.0001f;
+            }
+            return 60 / dist;
+        }
+    }
+
     private void Update()
     {
-        if (hasBeenInitialized)
+        if (hasBeenInitialized && !hasFinished)
         {
-            if(pathIndex == dna.genes.Count && !hasFinished)
+            if(pathIndex == dna.genes.Count || Vector2.Distance(transform.position, target) < 0.5f)
             {
-                End();
+                hasFinished = true;
             }
             if((Vector2)transform.position == nextPoint)
             {
@@ -45,13 +48,8 @@ public class GeneticPathFinder : MonoBehaviour
             }
             else
             {
-                transform.position = Vector2.MoveTowards(transform.position, nextPoint, creatureSpeed * Time.deltaTime);
+                transform.position = Vector2.MoveTowards(transform.position, nextPoint, beesSpeed * Time.deltaTime);
             }
         }
-    }
-
-    private void End()
-    {
-        hasFinished = true;
     }
 }
